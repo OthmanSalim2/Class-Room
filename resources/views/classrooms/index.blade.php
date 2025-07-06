@@ -9,6 +9,7 @@
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body">
+                        {{-- <h5 class="card-title">{{ ucwords($classroom->name) }}</h5> --}}
                         <h5 class="card-title">{{ $classroom->name }}</h5>
                         <a href="{{ route('classrooms.show', $classroom->id) }}"
                            class="btn btn-primary">{{ __('View class') }}</a>

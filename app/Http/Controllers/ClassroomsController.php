@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ClassroomRequest;
 use App\Models\Classroom;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\URL;
 
 class ClassroomsController extends Controller
 {
@@ -58,13 +62,24 @@ class ClassroomsController extends Controller
             $validated['cover_image'] = $path;
         }
 
+        DB::beginTransaction();
+        try{
+            $classroom = Classroom::create($request->all());
+            $classroom->join(Auth::id(), 'teacher');
+
+            DB::commit();
+        }catch(QueryException $e) {
+            DB::rollBack();
+            return back()->with('error', $e->getMessage())->withInput();
+        }
+
         // Method 2
 //        $request->merge([
 //            'code' => Str::random(8),
 //        ]);
 //        $validated['code'] = Str::random(8);
 
-        $classroom = Classroom::create($request->all());
+
 
         // Method 3
 //        $classroom = new Classroom($request->all());
@@ -86,7 +101,15 @@ class ClassroomsController extends Controller
     public function show(Classroom $classroom)
     {
 //        $classroom = Classroom::find($id);
-        return view('classrooms.show', compact('classroom'));
+        $invitation_link = URL::signedRoute('classrooms.join', [
+            'classroom' => $classroom->id,
+            'code' => $classroom->code,
+        ]);
+
+        return view('classrooms.show', [
+            'classroom' => $classroom,
+            'invitation_link' => $invitation_link,
+        ]);
     }
 
     /**

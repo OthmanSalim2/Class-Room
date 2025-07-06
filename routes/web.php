@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClassroomsController;
+use App\Http\Controllers\JoinClassroomController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TopicsController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,9 @@ Route::resources([
     'classrooms' => ClassroomsController::class,
     'topics' => TopicsController::class,
 ]);
+
+Route::get('classrooms/{classroom}/join', [JoinClassroomController::class, 'create'])->name('classrooms.create');
+Route::post('classrooms/{classroom}/join', [JoinClassroomController::class, 'store'])->name('classrooms.join');
 
 Route::get('login', [LoginController::class, 'create'])->name('login');
 Route::post('login', [LoginController::class, 'store'])->name('login.store');

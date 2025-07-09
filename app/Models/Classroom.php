@@ -22,13 +22,29 @@ class Classroom extends Model
         'cover_image_path', 'theme', 'user_id', 'status'
     ];
 
-    protected static function bootes()
+    // another way to use boot() method.
+    // protected static function boot() this function if used it will put in side it parent::boot();
+    protected static function booted()
     {
         static::addGlobalScope(UserClassroomScope::class);
 
         static::creating(function (Classroom $classroom) {
             $classroom->code = Str::random(8);
             $classroom->user_id = Auth::id();
+        });
+
+        static::forceDeleted(function (Classroom $classroom) {
+            static::deleteCoverImage($classroom->cover_image_path);
+        });
+
+        static::deleted(function (Classroom $classroom) {
+            $classroom->status = 'deleted';
+            $classroom->save();
+        });
+
+        static::restored(function (Classroom $classroom) {
+            $classroom->status = 'active';
+            $classroom->save();
         });
     }
 
@@ -61,7 +77,7 @@ class Classroom extends Model
     {
         if($this->cover_image_path)
         {
-            return Storage::disk('public')->url($this->cover_image_path);
+            return Storage::disk(static::$disk)->url($this->cover_image_path);
         }
         return "https://placehold.co/800x300";
     }

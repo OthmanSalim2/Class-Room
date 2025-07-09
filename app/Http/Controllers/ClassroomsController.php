@@ -176,4 +176,14 @@ class ClassroomsController extends Controller
         return redirect()->route('classrooms.index')
             ->with('success', 'Classroom deleted successfully');
     }
+
+    public function forceDelete($id)
+    {
+        $classroom = Classroom::findOrFail($id);
+        $classroom->forceDelete();
+        // Classroom::deleteCoverImage($classroom->cover_image_path);
+
+        return to_route('classrooms.trashed')
+            ->with('success', "Classroom {{ $classroom->name }} deleted forever!");
+    }
 }
